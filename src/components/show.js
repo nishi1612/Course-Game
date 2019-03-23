@@ -16,7 +16,7 @@ class Show extends Component {
     const boards = [];
     querySnapshot.forEach((doc) => {
       var {level,challengeNumber} = doc.data();
-      if(level==0){
+      if(level===0){
         boards.push({
           challengeNumber
         })
