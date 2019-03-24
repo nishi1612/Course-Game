@@ -8,23 +8,23 @@ class Show extends Component {
     this.ref = firebase.collection('challenge');
     this.unsubscribe = null;
     this.state = {
-      boards: []
+      challenges: []
     };
   }
 
   onCollectionUpdate = (querySnapshot) => {
-    const boards = [];
+    const challenges = [];
     querySnapshot.forEach((doc) => {
       var {level,challengeNumber} = doc.data();
-      if(level===0){
-        boards.push({
+      if(level>=this.props.match.params.id){
+        challenges.push({
           challengeNumber
         })
       }
       
     });
     this.setState({
-      boards
+      challenges
    });
   }
 
@@ -35,26 +35,14 @@ class Show extends Component {
   render() {
     return (
       <div className="container">
-        <div className="panel panel-default">
-          <div className="panel-heading">
-          </div>
-          <div class="panel-body">
-            <table class="table table-stripe">
-              <thead>
-                <tr>
-                  <th>ChallengeNumber</th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.boards.map(board =>
-                  <tr>
-                     <td><Link to={{pathname:"/showChallenge/" + board.challengeNumber}}>Challenge {board.challengeNumber}</Link></td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <table>
+          <tr>  <td>ChallengeNumber</td>  </tr>
+          {this.state.challenges.map(challenge =>
+            <tr>
+              <td><Link to={{pathname:"/showChallenge/" + challenge.challengeNumber}}>Challenge {challenge.challengeNumber}</Link></td>
+            </tr>
+          )}
+        </table>  
       </div>
     );
   }

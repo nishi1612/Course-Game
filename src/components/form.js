@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import firebase from './Firebase';
-
 class Loginform extends Component {
 
   constructor(props) {

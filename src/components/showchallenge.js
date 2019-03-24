@@ -9,21 +9,21 @@ function ShowQuestion(props){
   const o1 = props.o1;
   const o2 = props.o2;
   const j = props.j;
-  if(t==0){
+  if(t===0){
     return ( 
     <div>
       <par>{q}</par>
       <br />
       <input type="text" name={j}></input>
     </div> );
-  }else if(t==2){
+  }else if(t===2){
     return(
       <div>
         <par>{q}</par>
         <br />
-      <label>True <input type="radio" name={j} value="True"></input></label>
+      <label>True <input type="radio" name={j} value="True" ></input></label>
       <br/>
-      <label>False <input type="radio" name={j} value="False"></input></label>
+      <label>False <input type="radio" name={j} value="False" ></input></label>
       </div>
     );
   }
@@ -31,11 +31,13 @@ function ShowQuestion(props){
     <div>
       <par>{q}</par>
       <br/>
-      <label>{o0} <input type="radio" name={j} value={o0}></input></label>
+      {/* <fieldset id={j}> */}
+      <label>{o0} <input type="radio" name={j} value={o0} ></input></label>
       <br/>
-      <label>{o1} <input type="radio" name={j} value={o1}></input></label>
+      <label>{o1} <input type="radio" name={j} value={o1} ></input></label>
       <br/>
-      <label>{o2} <input type="radio" name={j} value={o2}></input></label>
+      <label>{o2} <input type="radio" name={j} value={o2} ></input></label>
+      {/* </fieldset> */}
     </div>
   ); 
 }
@@ -48,47 +50,48 @@ class Showchallenge extends Component {
       this.state = {
         questions: []
       };
+      this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     pushinarray(q,a,t,data,questions,j){
-      if(t==1){
+      if(t===1){
         var o0,o1,o2;
           if(j==0){
-            var {d0_1,d0_3,d0_2} = data;
+            var {d0_1,d0_2,d0_3} = data;
             o0=d0_1;
             o1=d0_2;
             o2=d0_3;
           }else if(j===1){
-            var {d1_1,d1_3,d1_2} = data;
+            var {d1_1,d1_2,d1_3} = data;
             o0=d1_1;
             o1=d1_2;
             o2=d1_3;
           }else if(j==2){
-            var {d2_1,d2_3,d2_2} = data;
+            var {d2_1,d2_2,d2_3} = data;
             o0=d2_1;
             o1=d2_2;
             o2=d2_3;
-          }else if(j==3){
-            var {d3_1,d3_3,d3_2} = data;
+          }else if(j===3){
+            var {d3_1,d3_2,d3_3} = data;
             o0=d3_1;
             o1=d3_2;
             o2=d3_3;
-          }else if(j==4){
+          }else if(j===4){
             var {d4_1,d4_3,d4_2} = data;
             o0=d4_1;
             o1=d4_2;
             o2=d4_3;
-          }else if(j==5){
+          }else if(j===5){
             var {d5_1,d5_3,d5_2} = data;
             o0=d5_1;
             o1=d5_2;
             o2=d5_3;
-          }else if(j==6){
+          }else if(j===6){
             var {d6_1,d6_3,d6_2} = data;
             o0=d6_1;
             o1=d6_2;
             o2=d6_3;
-          }else if(j==7){
+          }else if(j===7){
             var {d7_1,d7_3,d7_2} = data;
             o0=d7_1;
             o1=d7_2;
@@ -105,7 +108,7 @@ class Showchallenge extends Component {
             o2=d9_3;
           }
           questions.push({q,t,a,o0,o1,o2,j});
-      }else if(t==2){
+      }else if(t===2){
           var o0 = 'True';
           var o1 = 'False';
           questions.push({q,t,a,o0,o1,j});
@@ -141,20 +144,61 @@ class Showchallenge extends Component {
       this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
     }
 
+    handleSubmit = (event) => {
+      event.preventDefault();
+      var score = 0;
+      var correct = [];
+      var k =0;
+      for(var i=0;i<10;i++){
+        alert(this.state.questions[i].a);
+        if(this.state.questions[i].t===0){
+          if(event.target[k].value.toLowerCase() ===this.state.questions[i].a.toLowerCase()){
+            score = score + 1;
+            correct.push(1);
+          }else{
+            correct.push(0);
+          }
+          k=k+1;
+        }else if(this.state.questions[i].t===1){
+          for(var j=k;j<k+3;j++){
+            if(event.target[j].checked){
+              if(event.target[j].value.toLowerCase() ===this.state.questions[i].a.toLowerCase()){
+                score = score + 1;
+                correct.push(1);
+              }else{
+                correct.push(0);
+              }
+            }
+          }
+          k=k+3;
+        }else{
+          for(var j=k;j<k+2;j++){
+            if(event.target[j].checked){
+              if(event.target[j].value.toLowerCase() ===this.state.questions[i].a.toLowerCase()){
+                score = score + 1;
+                correct.push(1);
+              }else{
+                correct.push(0);
+              }
+            }
+          }
+          k=k+2;
+        }
+      }
+      alert(score);
+
+    }
+
     render() {
       return (
         <div className="container">
-          <div className="panel panel-default">
-            <form>
-            <div class="panel-body">
+          <form onSubmit={this.handleSubmit}>
             {this.state.questions.map(question =>
             <div><ShowQuestion q={question.q} t={question.t} o0={question.o0} o1={question.o1} o2={question.o2} j={question.j}
             /></div>
               )}
-            </div>
             <input type="submit" value="Submit" />
-            </form>
-          </div>
+          </form>
         </div>
       );
     }
