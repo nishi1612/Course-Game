@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import firebase from './Firebase';
+import Login from './login';
+import StudentDashboard from './studentDashboard';
 
 function ShowQuestion(props){
   const q = props.q;
@@ -31,13 +32,11 @@ function ShowQuestion(props){
     <div>
       <par>{q}</par>
       <br/>
-      {/* <fieldset id={j}> */}
       <label>{o0} <input type="radio" name={j} value={o0} ></input></label>
       <br/>
       <label>{o1} <input type="radio" name={j} value={o1} ></input></label>
       <br/>
       <label>{o2} <input type="radio" name={j} value={o2} ></input></label>
-      {/* </fieldset> */}
     </div>
   ); 
 }
@@ -48,15 +47,29 @@ class Showchallenge extends Component {
       this.ref = firebase.collection('challenge');
       this.unsubscribe = null;
       this.state = {
-        questions: []
+        questions: [],
+        showlogin : false,
+        showdashboard : false
       };
+      this.id = props.id;
+      this.level = props.level;
+      this.challengeNumber = props.challengeNumber;
       this.handleSubmit = this.handleSubmit.bind(this);
+      this.logout = this.logout.bind(this);
+      this.show_dashboard = this.show_dashboard.bind(this);
+    }
+
+    show_dashboard(){
+      this.setState({
+        showdashboard : true
+      });
+      return ;
     }
 
     pushinarray(q,a,t,data,questions,j){
       if(t===1){
         var o0,o1,o2;
-          if(j==0){
+          if(j===0){
             var {d0_1,d0_2,d0_3} = data;
             o0=d0_1;
             o1=d0_2;
@@ -66,7 +79,7 @@ class Showchallenge extends Component {
             o0=d1_1;
             o1=d1_2;
             o2=d1_3;
-          }else if(j==2){
+          }else if(j===2){
             var {d2_1,d2_2,d2_3} = data;
             o0=d2_1;
             o1=d2_2;
@@ -121,7 +134,7 @@ class Showchallenge extends Component {
       const questions = [];
       querySnapshot.forEach((doc) => {
         var {challengeNumber,q1,q2,q3,q0,q4,q5,q6,q7,q8,q9,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,t0,t1,t2,t3,t4,t5,t6,t7,t8,t9} = doc.data();
-        if(challengeNumber==this.props.match.params.id){
+        if(parseInt(challengeNumber)===parseInt(this.challengeNumber)){
           this.pushinarray(q0,a0,t0,doc.data(),questions,0);
           this.pushinarray(q1,a1,t1,doc.data(),questions,1);
           this.pushinarray(q2,a2,t2,doc.data(),questions,2);
@@ -133,7 +146,6 @@ class Showchallenge extends Component {
           this.pushinarray(q8,a8,t8,doc.data(),questions,8);
           this.pushinarray(q9,a9,t9,doc.data(),questions,9);
         }
-        
       });
       this.setState({
         questions
@@ -150,7 +162,6 @@ class Showchallenge extends Component {
       var correct = [];
       var k =0;
       for(var i=0;i<10;i++){
-        alert(this.state.questions[i].a);
         if(this.state.questions[i].t===0){
           if(event.target[k].value.toLowerCase() ===this.state.questions[i].a.toLowerCase()){
             score = score + 1;
@@ -185,23 +196,115 @@ class Showchallenge extends Component {
           k=k+2;
         }
       }
-      alert(score);
+      var to_change = false;
+      var doc_id = "";
+      const hello = firebase.collection('scores').get().then(snapshot => {
+        snapshot.docs.forEach(doc => {
+          var {challengeNumber,id,level,marks,array} = doc.data();
+          if(id === this.id && level===this.level && challengeNumber === this.challengeNumber){
+            if(marks>score){
+              score = marks;
+              correct = array;
+            }
+            to_change=true;
+            doc_id = doc.id;
+          }
+        });
+      });
+      if(to_change===true){
+        firebase.collection("scores").doc(doc_id).delete();
+      }
+      const userRef = firebase.collection("scores").add({
+        challengeNumber : this.challengeNumber,
+        level : this.level,
+        marks : score,
+        id : this.id,
+        array : correct
+      });
+      var to_be_done = 0;
+      const hi = firebase.collection('level').get().then(snapshot => {
+        snapshot.docs.forEach(doc => {
+        var {level,challenge} = doc.data();
+        if(level===this.level){
+          to_be_done = challenge;
+        }
+        });
+      });
+      var done = 0;
+      const ab = firebase.collection('scores').get().then(snapshot => {
+        snapshot.docs.forEach(doc => {
+        var {level,challenge,id} = doc.data();
+        if(level===this.level && id===this.id){
+          done = done + 1;
+        }
+        });
+      });
+      if(to_be_done === done){
+        var doc_id_2="";
+        var new_level,new_email,new_name,new_password,new_student;
+        const ab = firebase.collection('user').get().then(snapshot => {
+          snapshot.docs.forEach(doc => {
+          var {id,level,email,name,password,student} = doc.data();
+          if(id===this.id){
+            doc_id_2 = doc.id;
+            new_level = level + 1;
+            new_email = email;
+            new_name = name;
+            new_password = password;
+            new_student = student;
+          }
+          });
+        });
+        firebase.collection("user").doc(doc_id_2).delete();
+        const userRef = firebase.collection("user").add({
+          id : this.id,
+          password : new_password,
+          level : new_level,
+          email : new_email,
+          student : new_student,
+          name : new_name 
+        });
+      }
+      this.level = new_level;
+      this.setState({
+        show_dashboard : true
+      });
+    }
 
+    logout(){
+      this.setState({
+        showlogin : true
+      }); 
+      return ;
     }
 
     render() {
+      if(this.state.showlogin === true){
+        return (<Login />);
+      }else if(this.state.showdashboard === true){
+        return ( 
+        <StudentDashboard id={this.id} level={this.level} />
+        );
+      }else{
       return (
         <div className="container">
-          <form onSubmit={this.handleSubmit}>
-            {this.state.questions.map(question =>
-            <div><ShowQuestion q={question.q} t={question.t} o0={question.o0} o1={question.o1} o2={question.o2} j={question.j}
-            /></div>
-              )}
-            <input type="submit" value="Submit" />
-          </form>
+          <button onClick={this.logout}>Logout</button>
+          <br />
+          <button onClick={this.show_dashboard}>Show Dashboard</button>
+          <br />
+          <div className = "panel">
+            <form onSubmit={this.handleSubmit}>
+              {this.state.questions.map(question =>
+              <div><ShowQuestion q={question.q} t={question.t} o0={question.o0} o1={question.o1} o2={question.o2} j={question.j}
+              /></div>
+                )}
+              <input type="submit" value="Submit" />
+            </form>
+          </div>
         </div>
       );
     }
   }
+}
   
-  export default Showchallenge;
+export default Showchallenge;
