@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import firebase from './Firebase';
+import ProfessorDashboard from './professorDashboard';
+import Login from './login';
 
 function ShowQuestion(props){
     const q = props.q;
@@ -47,12 +49,18 @@ class Editquestion extends Component {
       this.ref = firebase.collection('challenge');
       this.unsubscribe = null;
       this.state = {
-        questions : []
+        questions : [],
+        found : false,
+        show_prof_dashboard : false,
+        show_login : false
       };
       this.level = props.level;
       this.id = "0";
+      this.get_id = props.id;
       this.challengeNumber = props.challengeNumber;
       this.handleSubmit = this.handleSubmit.bind(this);
+      this.prof_dashboard = this.prof_dashboard.bind(this);
+      this.logout = this.logout.bind(this);
     }
   
     pushinarray(q,a,t,data,questions,j){
@@ -136,6 +144,9 @@ class Editquestion extends Component {
             this.pushinarray(q8,a8,t8,doc.data(),questions,8);
             this.pushinarray(q9,a9,t9,doc.data(),questions,9);
             this.id = doc.id;
+            this.setState({
+              found : true
+            });
         }
       });
       this.setState({
@@ -243,20 +254,56 @@ class Editquestion extends Component {
       });  
     }
 
+    prof_dashboard(){
+      this.setState({
+        show_prof_dashboard : true
+      });
+      return ;
+    }
+
+    logout(){
+      this.setState({
+        show_login : true
+      });
+      return ;
+    }
+
     render() {
-      return (
-        <div className="container">
-        <div className = "panel">
-          <form onSubmit={this.handleSubmit}>
-          {this.state.questions.map(question =>
-            <div><ShowQuestion a={question.a} q={question.q} t={question.t} o0={question.o0} o1={question.o1} o2={question.o2} j={question.j}
-            /></div>
-              )}
-              <input type="submit"></input>
-          </form>
+      if(this.state.show_login === true){
+        return (
+          <Login />
+        );
+      }else if(this.state.show_prof_dashboard === true){
+        return (
+          <ProfessorDashboard id={this.get_id} />
+        );
+      }else if(this.state.found===false){
+        return (
+          <div>
+            Sorry we could not find such a challenge belonging to level {this.level} and having challenge number {this.challengeNumber}.
+            <br />
+            <button onClick={this.show_prof_dashboard}>Professor Dashboard</button>
           </div>
-        </div>
-      );
+        );
+      }else{
+        return (
+          <div className="container">
+          <div className = "panel">
+            <button onClick={this.prof_dashboard}>Professor Dashboard</button>
+            <br />
+            <button onClick={this.logout}>Logout</button>
+            <br />
+            <form onSubmit={this.handleSubmit}>
+            {this.state.questions.map(question =>
+              <div><ShowQuestion a={question.a} q={question.q} t={question.t} o0={question.o0} o1={question.o1} o2={question.o2} j={question.j}
+              /></div>
+                )}
+                <input type="submit"></input>
+            </form>
+            </div>
+          </div>
+        );
+      }
     }
   }
   

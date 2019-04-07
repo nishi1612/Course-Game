@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import firebase from './Firebase';
-import Editquestion from './editquestions';
+import ProfessorDashboard from './professorDashboard';
 import StudentDashboard from './studentDashboard';
 
 class Login extends Component {
@@ -67,7 +67,7 @@ class Login extends Component {
         );
       }else if(this.state.done===true && this.state.student===false){
         return (
-          <Editquestion />
+          <ProfessorDashboard id={this.state.id}/>
         );
       }else{
         return (
