@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Show from './show';
 import Login from './login';
+import Idscoreboard from './idscoreboard';
 
 class StudentDashboard extends Component {
     constructor(props) {
@@ -8,7 +9,8 @@ class StudentDashboard extends Component {
       this.state = {
         show_challenge : false,
         show_scoreboard : false,
-        show_login : false
+        show_login : false,
+        show_review : false
       };
       this.id = props.id;
       this.level = props.level;
@@ -33,7 +35,7 @@ class StudentDashboard extends Component {
 
     logout(){
         this.setState({
-            showlogin : true
+            show_login : true
         });
         return ;
     }
@@ -42,11 +44,15 @@ class StudentDashboard extends Component {
         if(this.state.show_challenge === true){
             return ( <Show level={this.level} id={this.id}/> );
         }else if(this.state.show_scoreboard === true){
-            return ;
-        }else if(this.state.showlogin === true){
+            return (
+                <Idscoreboard id={this.id} level={this.level}/>
+            );
+        }else if(this.state.showl_ogin === true){
             return (
                 <Login />
             );
+        }else if(this.state.show_review === true){
+            return ;
         }else{
             return (
                 <div className = "container">

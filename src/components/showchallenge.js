@@ -240,29 +240,31 @@ class Showchallenge extends Component {
         });
       });
       if(to_be_done === done){
-        var doc_id_2="";
+        var hellos = false;;
+        var doc_id_2;
         var new_level,new_email,new_name,new_password,new_student;
-        const ab = firebase.collection('user').get().then(snapshot => {
+        firebase.collection('user').get().then(snapshot => {
           snapshot.docs.forEach(doc => {
           var {id,level,email,name,password,student} = doc.data();
-          if(id===this.id){
+          if(id===this.id && hellos===false && student===true){
             doc_id_2 = doc.id;
             new_level = level + 1;
             new_email = email;
             new_name = name;
             new_password = password;
+            hellos=true;
             new_student = student;
+            firebase.collection('user').doc(doc_id_2).delete();
+            const userRef = firebase.collection("user").add({
+              id : this.id,
+              password : new_password,
+              level : new_level,
+              email : new_email,
+              student : new_student,
+              name : new_name 
+            });
           }
           });
-        });
-        firebase.collection("user").doc(doc_id_2).delete();
-        const userRef = firebase.collection("user").add({
-          id : this.id,
-          password : new_password,
-          level : new_level,
-          email : new_email,
-          student : new_student,
-          name : new_name 
         });
       }
       this.level = new_level;
